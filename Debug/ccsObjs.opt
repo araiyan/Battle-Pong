@@ -1,3 +1,4 @@
+"./dot_tracker.obj"
 "./i2c_if.obj"
 "./main.obj"
 "./pin_mux_config.obj"

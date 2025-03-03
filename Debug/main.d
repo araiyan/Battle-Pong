@@ -36,6 +36,7 @@ main.obj: ../oled/Adafruit_SSD1351.h
 main.obj: ../oled/Adafruit_GFX.h
 main.obj: ../oled/oled_test.h
 main.obj: ../oled/glcdfont.h
+main.obj: ../dot_tracker.h
 
 ../main.c:
 
@@ -108,4 +109,6 @@ C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.h:
 ../oled/oled_test.h:
 
 ../oled/glcdfont.h:
+
+../dot_tracker.h:
 

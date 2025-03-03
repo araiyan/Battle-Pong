@@ -10,6 +10,7 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./dot_tracker.obj" \
 "./i2c_if.obj" \
 "./main.obj" \
 "./pin_mux_config.obj" \
@@ -152,8 +153,8 @@ Battle-Pong.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)
-	-$(RM) "i2c_if.obj" "main.obj" "pin_mux_config.obj" "startup_ccs.obj" "uart_if.obj" "oled\Adafruit_GFX.obj" "oled\Adafruit_OLED.obj" "oled\oled_test.obj" 
-	-$(RM) "i2c_if.d" "main.d" "pin_mux_config.d" "startup_ccs.d" "uart_if.d" "oled\Adafruit_GFX.d" "oled\Adafruit_OLED.d" "oled\oled_test.d" 
+	-$(RM) "dot_tracker.obj" "i2c_if.obj" "main.obj" "pin_mux_config.obj" "startup_ccs.obj" "uart_if.obj" "oled\Adafruit_GFX.obj" "oled\Adafruit_OLED.obj" "oled\oled_test.obj" 
+	-$(RM) "dot_tracker.d" "i2c_if.d" "main.d" "pin_mux_config.d" "startup_ccs.d" "uart_if.d" "oled\Adafruit_GFX.d" "oled\Adafruit_OLED.d" "oled\oled_test.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

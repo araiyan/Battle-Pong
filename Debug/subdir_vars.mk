@@ -9,6 +9,7 @@ CMD_SRCS += \
 ../cc3200v1p32.cmd 
 
 C_SRCS += \
+../dot_tracker.c \
 C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c \
 ../main.c \
 ../pin_mux_config.c \
@@ -16,6 +17,7 @@ C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/startup_ccs.c \
 ../uart_if.c 
 
 C_DEPS += \
+./dot_tracker.d \
 ./i2c_if.d \
 ./main.d \
 ./pin_mux_config.d \
@@ -23,6 +25,7 @@ C_DEPS += \
 ./uart_if.d 
 
 OBJS += \
+./dot_tracker.obj \
 ./i2c_if.obj \
 ./main.obj \
 ./pin_mux_config.obj \
@@ -30,6 +33,7 @@ OBJS += \
 ./uart_if.obj 
 
 OBJS__QUOTED += \
+"dot_tracker.obj" \
 "i2c_if.obj" \
 "main.obj" \
 "pin_mux_config.obj" \
@@ -37,6 +41,7 @@ OBJS__QUOTED += \
 "uart_if.obj" 
 
 C_DEPS__QUOTED += \
+"dot_tracker.d" \
 "i2c_if.d" \
 "main.d" \
 "pin_mux_config.d" \
@@ -44,6 +49,7 @@ C_DEPS__QUOTED += \
 "uart_if.d" 
 
 C_SRCS__QUOTED += \
+"../dot_tracker.c" \
 "C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c" \
 "../main.c" \
 "../pin_mux_config.c" \
