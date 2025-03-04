@@ -73,59 +73,6 @@ void ballUpdate(struct OledBall* ball) {
     }
 }
 
-// *********************************************************** //
-// Game Logic
-
-void HitBoxGamePlay(struct HitBoxGame* game) {
-    int accX, accY;
-
-    drawRect(game->boxPos.x, game->boxPos.y, game->boxSize.x, game->boxSize.y, HIT_BOX_COLOR);
-    while (1) {
-        grabAccelerometerData(&accX, &accY);
-        game->ball->update(game->ball);
-        game->update(game);
-
-        UtilsDelay(10000);
-    }
-}
-
-// update the position of the rectangle by removing the old box and
-// creating a new box in a random location
-void HitBoxGameDrawGoalBox(struct HitBoxGame* game) {
-    drawRect(game->boxPos.y, game->boxPos.x, game->boxSize.y, game->boxSize.x, HIT_BOX_BG);
-
-    // Print Score to the screen
-    game->score += 1;
-    setCursor(4, 4);
-    Outstr("Score: ");
-
-    char scr[20];
-    sprintf(scr, "%d", game->score);
-    fillRoundRect(40, 4, 40, 10, 0, HIT_BOX_BG);
-    setCursor(40, 4);
-    Outstr(scr);
-
-
-    int newBoxX = (rand() % 96) + 8;
-    int newBoxY = (rand() % 96) + 8;
-
-    game->boxPos.x = newBoxX;
-    game->boxPos.y = newBoxY;
-
-    drawRect(game->boxPos.y, game->boxPos.x, game->boxSize.y, game->boxSize.x, HIT_BOX_COLOR);
-    return;
-}
-
-// Collision detection of the ball with the box
-void HitBoxGameBoxUpdate(struct HitBoxGame* game) {
-    if (game->ball->pos.x >= (game->boxPos.x - 1) && game->ball->pos.y >= (game->boxPos.y - 1)
-            && game->ball->pos.x < (game->boxPos.x + game->boxSize.x)
-            && game->ball->pos.y < (game->boxPos.y + game->boxSize.y)) {
-
-        HitBoxGameDrawGoalBox(game);
-    }
-}
-
 struct OledBall* CreateDotObject(){
     struct OledBall* oledBall = (struct OledBall*)malloc(sizeof(struct OledBall));
     oledBall->pos.x = 64;

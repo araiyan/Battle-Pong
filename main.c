@@ -87,6 +87,7 @@
 
 // Game Libraries
 #include "dot_tracker.h"
+#include "game.h"
 
 #define APPLICATION_VERSION     "1.4.0"
 

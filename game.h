@@ -1,6 +1,7 @@
-#ifndef __DOT_TRACKER_H__
-#define __DOT_TRACKER_H__
+#ifndef __GAME_H__
+#define __GAME_H__
 
+#include "dot_tracker.h"
 //*****************************************************************************
 //
 // If building with a C++ compiler, make all of the definitions in this header
@@ -38,30 +39,26 @@ extern "C"
 
 // *********************************************************** //
 // Useful Structures
-struct Vector2DI {
-    int x, y;
-};
-struct Vector2DF {
-    float x, y;
+struct HitBoxGame {
+    struct Vector2DI boxPos;
+    struct Vector2DI boxSize;
+    struct OledBall* ball;
+
+    int score;
+
+    void (*play)(struct HitBoxGame*);
+    void (*update)(struct HitBoxGame*);
 };
 
-struct OledBall {
-    struct Vector2DF pos;
-    struct Vector2DF velocity;
-
-    unsigned int color;
-    unsigned int bgColor;
-
-    void (*update)(struct OledBall*);
-};
 
 //*****************************************************************************
 //
 // API Function prototypes
 //
 //*****************************************************************************
-extern void ballUpdate(struct OledBall* ball);
-extern struct OledBall* CreateDotObject();
+extern void HitBoxGamePlay(struct HitBoxGame* game);
+extern void HitBoxGameDrawGoalBox(struct HitBoxGame* game);
+extern void HitBoxGameBoxUpdate(struct HitBoxGame* game);
 
 //*****************************************************************************
 //
@@ -72,4 +69,4 @@ extern struct OledBall* CreateDotObject();
 }
 #endif
 
-#endif //__DOT_TRACKER_H__
+#endif //__GAME_H__
