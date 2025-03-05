@@ -215,14 +215,14 @@ void main()
 
     SPIInit();
 
-    struct OledBall* dotBall = CreateDotObject();
-    struct HitBoxGame hitBoxGame = {{64, 64}, {HIT_BOX_GOAL_SIZE, HIT_BOX_GOAL_SIZE},
-                                    dotBall, 0, HitBoxGamePlay, HitBoxGameBoxUpdate};
+    struct BattlePongGame* hitBoxGame = CreateBattlePongGame();
 
     Adafruit_Init();
     fillScreen(BLACK);
 
 
-    hitBoxGame.play(&hitBoxGame);
+    hitBoxGame->play(hitBoxGame);
+
+    while(1);
 }
 

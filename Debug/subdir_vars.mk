@@ -11,10 +11,10 @@ CMD_SRCS += \
 C_SRCS += \
 ../dot_tracker.c \
 ../game.c \
-C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c \
+C:/TI/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c \
 ../main.c \
 ../pin_mux_config.c \
-C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/startup_ccs.c \
+C:/TI/CC3200SDK_1.5.0/cc3200-sdk/example/common/startup_ccs.c \
 ../uart_if.c 
 
 C_DEPS += \
@@ -56,10 +56,10 @@ C_DEPS__QUOTED += \
 C_SRCS__QUOTED += \
 "../dot_tracker.c" \
 "../game.c" \
-"C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c" \
+"C:/TI/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c" \
 "../main.c" \
 "../pin_mux_config.c" \
-"C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/startup_ccs.c" \
+"C:/TI/CC3200SDK_1.5.0/cc3200-sdk/example/common/startup_ccs.c" \
 "../uart_if.c" 
 
 

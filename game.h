@@ -13,7 +13,13 @@ extern "C"
 {
 #endif
 
-// *** GLOBAL VARIABLES FOR DOT *** \\\
+// OLED Configuration
+#define WINDOW_WIDTH 128
+#define WINDOW_HEIGHT 128
+
+#define WIN_CON  -1
+#define LOSE_CON -2
+
 
 // Color definitions
 #define BLACK           0x0000
@@ -35,19 +41,47 @@ extern "C"
 #define HIT_BOX_BG    BLACK
 #define HIT_SCORE_COLOR BLUE
 
-
+// Scroll Pad Configuration
+#define SCROLL_PAD_BASE_Y 124
+#define SCROLL_PAD_INITIAL_SIZE 12
 
 // *********************************************************** //
 // Useful Structures
-struct HitBoxGame {
+struct BattlePongGame {
     struct Vector2DI boxPos;
     struct Vector2DI boxSize;
-    struct OledBall* ball;
+    struct OledBall* dotBall;
+    struct ScrollPad* sPad;
+    struct PongBall* pBall;
 
+    unsigned int bgColor;
     int score;
+    int winCondition;
 
-    void (*play)(struct HitBoxGame*);
-    void (*update)(struct HitBoxGame*);
+    int redrawCount;
+
+    void (*play)(struct BattlePongGame*);
+    void (*update)(struct BattlePongGame*);
+};
+
+struct ScrollPad {
+    struct Vector2DF pos;
+
+    int size;
+    float speed;
+    unsigned int color;
+
+    void (*update)(struct ScrollPad*, unsigned int);
+};
+
+struct PongBall {
+    struct Vector2DF pos;
+    struct Vector2DF velocity;
+
+    unsigned int color;
+    unsigned int radius;
+
+    void (*update)(struct PongBall*, struct BattlePongGame*);
 };
 
 
@@ -56,10 +90,17 @@ struct HitBoxGame {
 // API Function prototypes
 //
 //*****************************************************************************
-extern void HitBoxGamePlay(struct HitBoxGame* game);
-extern void HitBoxGameDrawGoalBox(struct HitBoxGame* game);
-extern void HitBoxGameBoxUpdate(struct HitBoxGame* game);
+extern void BattlePongGamePlay(struct BattlePongGame* game);
+extern void BattlePongGameDrawGoalBox(struct BattlePongGame* game);
+extern void BattlePongGameBoxUpdate(struct BattlePongGame* game);
+extern struct BattlePongGame* CreateBattlePongGame();
 
+extern void ScrollPadUpdate(struct ScrollPad* sPad, unsigned int bgColor);
+extern void ScrollPadDraw(struct ScrollPad* sPad);
+extern struct ScrollPad* CreateScrollPadObject();
+
+extern void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game);
+extern struct PongBall* CreatePongBallObject(int x, int y);
 //*****************************************************************************
 //
 // Mark the end of the C bindings section for C++ compilers.
