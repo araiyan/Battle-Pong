@@ -11,10 +11,11 @@ CMD_SRCS += \
 C_SRCS += \
 ../dot_tracker.c \
 ../game.c \
-C:/TI/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c \
+C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c \
 ../main.c \
 ../pin_mux_config.c \
-C:/TI/CC3200SDK_1.5.0/cc3200-sdk/example/common/startup_ccs.c \
+../scroll_pad.c \
+C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/startup_ccs.c \
 ../uart_if.c 
 
 C_DEPS += \
@@ -23,6 +24,7 @@ C_DEPS += \
 ./i2c_if.d \
 ./main.d \
 ./pin_mux_config.d \
+./scroll_pad.d \
 ./startup_ccs.d \
 ./uart_if.d 
 
@@ -32,6 +34,7 @@ OBJS += \
 ./i2c_if.obj \
 ./main.obj \
 ./pin_mux_config.obj \
+./scroll_pad.obj \
 ./startup_ccs.obj \
 ./uart_if.obj 
 
@@ -41,6 +44,7 @@ OBJS__QUOTED += \
 "i2c_if.obj" \
 "main.obj" \
 "pin_mux_config.obj" \
+"scroll_pad.obj" \
 "startup_ccs.obj" \
 "uart_if.obj" 
 
@@ -50,16 +54,18 @@ C_DEPS__QUOTED += \
 "i2c_if.d" \
 "main.d" \
 "pin_mux_config.d" \
+"scroll_pad.d" \
 "startup_ccs.d" \
 "uart_if.d" 
 
 C_SRCS__QUOTED += \
 "../dot_tracker.c" \
 "../game.c" \
-"C:/TI/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c" \
+"C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/i2c_if.c" \
 "../main.c" \
 "../pin_mux_config.c" \
-"C:/TI/CC3200SDK_1.5.0/cc3200-sdk/example/common/startup_ccs.c" \
+"../scroll_pad.c" \
+"C:/ti/CC3200SDK_1.5.0/cc3200-sdk/example/common/startup_ccs.c" \
 "../uart_if.c" 
 
 

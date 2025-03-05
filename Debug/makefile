@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/TI/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS
+CG_TOOL_ROOT := C:/ti/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -15,6 +15,7 @@ ORDERED_OBJS += \
 "./i2c_if.obj" \
 "./main.obj" \
 "./pin_mux_config.obj" \
+"./scroll_pad.obj" \
 "./startup_ccs.obj" \
 "./uart_if.obj" \
 "./oled/Adafruit_GFX.obj" \
@@ -22,7 +23,7 @@ ORDERED_OBJS += \
 "./oled/oled_test.obj" \
 "../cc3200v1p32.cmd" \
 $(GEN_CMDS__FLAG) \
--l"C:/TI/CC3200SDK_1.5.0/cc3200-sdk/driverlib/ccs/Release/driverlib.a" \
+-l"C:/ti/CC3200SDK_1.5.0/cc3200-sdk/driverlib/ccs/Release/driverlib.a" \
 -llibc.a \
 
 -include ../makefile.init
@@ -146,7 +147,7 @@ all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 Battle-Pong.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
-	"C:/TI/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=none -me -Ooff --define=ccs --define=cc3200 -g --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"Battle-Pong.map" --heap_size=0x800 --stack_size=0x800 -i"C:/TI/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/lib" -i"C:/TI/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="Battle-Pong_linkInfo.xml" --rom_model -o "Battle-Pong.out" $(ORDERED_OBJS)
+	"C:/ti/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=none -me -Ooff --define=ccs --define=cc3200 -g --diag_warning=225 --diag_wrap=off --display_error_number --abi=eabi -z -m"Battle-Pong.map" --heap_size=0x800 --stack_size=0x800 -i"C:/ti/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/lib" -i"C:/ti/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="Battle-Pong_linkInfo.xml" --rom_model -o "Battle-Pong.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 	@$(MAKE) --no-print-directory post-build
@@ -154,13 +155,13 @@ Battle-Pong.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)
-	-$(RM) "dot_tracker.obj" "game.obj" "i2c_if.obj" "main.obj" "pin_mux_config.obj" "startup_ccs.obj" "uart_if.obj" "oled\Adafruit_GFX.obj" "oled\Adafruit_OLED.obj" "oled\oled_test.obj" 
-	-$(RM) "dot_tracker.d" "game.d" "i2c_if.d" "main.d" "pin_mux_config.d" "startup_ccs.d" "uart_if.d" "oled\Adafruit_GFX.d" "oled\Adafruit_OLED.d" "oled\oled_test.d" 
+	-$(RM) "dot_tracker.obj" "game.obj" "i2c_if.obj" "main.obj" "pin_mux_config.obj" "scroll_pad.obj" "startup_ccs.obj" "uart_if.obj" "oled\Adafruit_GFX.obj" "oled\Adafruit_OLED.obj" "oled\oled_test.obj" 
+	-$(RM) "dot_tracker.d" "game.d" "i2c_if.d" "main.d" "pin_mux_config.d" "scroll_pad.d" "startup_ccs.d" "uart_if.d" "oled\Adafruit_GFX.d" "oled\Adafruit_OLED.d" "oled\oled_test.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
 post-build:
-	-C:/TI/ccs1250/ccs/utils/tiobj2bin/tiobj2bin Battle-Pong.out Battle-Pong.bin C:/TI/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armofd C:/TI/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armhex C:/TI/ccs1250/ccs/utils/tiobj2bin/mkhex4bin
+	-C:/ti/ccs1250/ccs/utils/tiobj2bin/tiobj2bin Battle-Pong.out Battle-Pong.bin C:/ti/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armofd C:/ti/ccs1250/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/bin/armhex C:/ti/ccs1250/ccs/utils/tiobj2bin/mkhex4bin
 	-@echo ' '
 
 .PHONY: all clean dependents

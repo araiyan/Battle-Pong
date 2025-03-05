@@ -2,6 +2,7 @@
 #define __GAME_H__
 
 #include "dot_tracker.h"
+#include "scroll_pad.h"
 //*****************************************************************************
 //
 // If building with a C++ compiler, make all of the definitions in this header
@@ -41,10 +42,6 @@ extern "C"
 #define HIT_BOX_BG    BLACK
 #define HIT_SCORE_COLOR BLUE
 
-// Scroll Pad Configuration
-#define SCROLL_PAD_BASE_Y 124
-#define SCROLL_PAD_INITIAL_SIZE 12
-
 // *********************************************************** //
 // Useful Structures
 struct BattlePongGame {
@@ -64,20 +61,11 @@ struct BattlePongGame {
     void (*update)(struct BattlePongGame*);
 };
 
-struct ScrollPad {
-    struct Vector2DF pos;
-
-    int size;
-    float speed;
-    unsigned int color;
-
-    void (*update)(struct ScrollPad*, unsigned int);
-};
-
 struct PongBall {
     struct Vector2DF pos;
     struct Vector2DF velocity;
 
+    unsigned int relativeSpeed;
     unsigned int color;
     unsigned int radius;
 
@@ -94,10 +82,6 @@ extern void BattlePongGamePlay(struct BattlePongGame* game);
 extern void BattlePongGameDrawGoalBox(struct BattlePongGame* game);
 extern void BattlePongGameBoxUpdate(struct BattlePongGame* game);
 extern struct BattlePongGame* CreateBattlePongGame();
-
-extern void ScrollPadUpdate(struct ScrollPad* sPad, unsigned int bgColor);
-extern void ScrollPadDraw(struct ScrollPad* sPad);
-extern struct ScrollPad* CreateScrollPadObject();
 
 extern void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game);
 extern struct PongBall* CreatePongBallObject(int x, int y);

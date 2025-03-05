@@ -55,6 +55,16 @@ struct OledBall {
     void (*update)(struct OledBall*);
 };
 
+struct CannonBall {
+    struct Vector2DI position;
+
+    unsigned int speed;
+    unsigned int currentSize, maxSize;
+    unsigned int color;
+
+    void (*update)(struct CannonBall*);
+};
+
 //*****************************************************************************
 //
 // API Function prototypes
