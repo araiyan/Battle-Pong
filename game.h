@@ -42,6 +42,11 @@ extern "C"
 #define HIT_BOX_BG    BLACK
 #define HIT_SCORE_COLOR BLUE
 
+// CANNON FIRE CONFIGURATION
+#define CANNON_RELOAD_TIME 100
+#define CANNON_MAX_NUM_SHOTS 10
+#define CANNON_SIZE 1
+
 // *********************************************************** //
 // Useful Structures
 struct BattlePongGame {
@@ -51,14 +56,21 @@ struct BattlePongGame {
     struct ScrollPad* sPad;
     struct PongBall* pBall;
 
+    struct OledBall* cannonShots;
+    int numShots;
+
     unsigned int bgColor;
     int score;
     int winCondition;
 
     int redrawCount;
 
+    int cannonTrigger;
+    int cannonBuffer;
+
     void (*play)(struct BattlePongGame*);
-    void (*update)(struct BattlePongGame*);
+    void (*collisionDetection)(struct BattlePongGame*);
+    void (*fireHandler)(struct BattlePongGame*);
 };
 
 struct PongBall {
@@ -81,6 +93,7 @@ struct PongBall {
 extern void BattlePongGamePlay(struct BattlePongGame* game);
 extern void BattlePongGameDrawGoalBox(struct BattlePongGame* game);
 extern void BattlePongGameBoxUpdate(struct BattlePongGame* game);
+extern void BattlePongGameFireHandler(struct BattlePongGame* game);
 extern struct BattlePongGame* CreateBattlePongGame();
 
 extern void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game);
