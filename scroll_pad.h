@@ -16,6 +16,10 @@ extern "C"
 // Scroll Pad Configuration
 #define SCROLL_PAD_BASE_Y 124
 #define SCROLL_PAD_INITIAL_SIZE 12
+#define SCROLL_PAD_INITIAL_POWER 0.1
+
+#define SCROLL_PAD_POWER_UPGRADE_COST 2
+#define SCROLL_PAD_POWER_UPGRADE_INCR 0.02
 
 // Scroll Pad Struct
 struct ScrollPad {

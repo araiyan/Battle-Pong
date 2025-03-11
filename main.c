@@ -37,7 +37,7 @@
 
 //*****************************************************************************
 //
-// Application Name     - SPI Demo
+// Application Name     - Battle Pong
 // Application Overview - The demo application focuses on showing the required 
 //                        initialization sequence to enable the CC3200 SPI 
 //                        module in full duplex 4-wire master and slave mode(s).
@@ -56,6 +56,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <math.h>
 #include <time.h>
 
@@ -72,6 +73,8 @@
 #include "prcm.h"
 #include "uart.h"
 #include "interrupt.h"
+#include "gpio.h"
+#include "gpio_if.h"
 
 // Common interface includes
 #include "uart_if.h"
@@ -107,10 +110,23 @@ extern void (* const g_pfnVectors[])(void);
 #if defined(ewarm)
 extern uVectorEntry __vector_table;
 #endif
+
+
+volatile int* upgradeTrigger;
 //*****************************************************************************
 //                 GLOBAL VARIABLES -- End
 //*****************************************************************************
 
+static void GPIOA2IntHandler(void) {
+    uint64_t ulStatus = GPIOIntStatus(UPGRADE_POWER_BUTTON_BASE, true);
+    GPIOIntClear(UPGRADE_POWER_BUTTON_BASE, ulStatus);
+
+    if (ulStatus & UPGRADE_POWER_BUTTON_PIN) {
+        *upgradeTrigger = true;
+    }
+
+    return;
+}
 
 
 //*****************************************************************************
@@ -177,6 +193,17 @@ SPIInit(void)
     MAP_SPIEnable(GSPI_BASE);
 }
 
+static void
+ButtonInit(void)
+{
+    GPIOIntRegister(UPGRADE_POWER_BUTTON_BASE, GPIOA2IntHandler);
+    GPIOIntTypeSet(UPGRADE_POWER_BUTTON_BASE, UPGRADE_POWER_BUTTON_PIN, GPIO_FALLING_EDGE);
+    GPIOIntClear(UPGRADE_POWER_BUTTON_BASE, UPGRADE_POWER_BUTTON_PIN);
+
+    // Enable Interrupts
+    GPIOIntEnable(UPGRADE_POWER_BUTTON_BASE, UPGRADE_POWER_BUTTON_PIN);
+}
+
 //*****************************************************************************
 //
 //! Main function for spi demo application
@@ -186,8 +213,7 @@ SPIInit(void)
 //! \return None.
 //
 //*****************************************************************************
-void main()
-{
+void main(){
     //
     // Initialize Board configurations
     //
@@ -214,14 +240,16 @@ void main()
     ClearTerm();
 
     SPIInit();
+    ButtonInit();
 
-    struct BattlePongGame* hitBoxGame = CreateBattlePongGame();
+    struct BattlePongGame* battlePongGame = CreateBattlePongGame();
+    upgradeTrigger = &(battlePongGame->upgradePowerTrigger);
 
     Adafruit_Init();
     fillScreen(BLACK);
 
 
-    hitBoxGame->play(hitBoxGame);
+    battlePongGame->play(battlePongGame);
 
     while(1);
 }

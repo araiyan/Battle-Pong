@@ -68,9 +68,13 @@ struct BattlePongGame {
     int cannonTrigger;
     int cannonBuffer;
 
+    int upgradePowerTrigger;
+    int upgradePowerBuffer;
+
     void (*play)(struct BattlePongGame*);
     void (*collisionDetection)(struct BattlePongGame*);
     void (*fireHandler)(struct BattlePongGame*);
+    void (*upgradeHandler)(struct BattlePongGame*);
 };
 
 struct PongBall {
@@ -94,9 +98,12 @@ extern void BattlePongGamePlay(struct BattlePongGame* game);
 extern void BattlePongGameDrawGoalBox(struct BattlePongGame* game);
 extern void BattlePongGameBoxUpdate(struct BattlePongGame* game);
 extern void BattlePongGameFireHandler(struct BattlePongGame* game);
+extern void BattlePongGameUpgradeHandler(struct BattlePongGame* game);
 extern struct BattlePongGame* CreateBattlePongGame();
 
 extern void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game);
+extern void PongBallNeutral(struct PongBall* pBall, struct BattlePongGame* game);
+extern void PongBallRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, float recvPosX);
 extern struct PongBall* CreatePongBallObject(int x, int y);
 //*****************************************************************************
 //

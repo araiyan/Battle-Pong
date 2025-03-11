@@ -118,7 +118,7 @@ struct ScrollPad* CreateScrollPadObject() {
     sPad->pos.y = SCROLL_PAD_BASE_Y;
     sPad->size = SCROLL_PAD_INITIAL_SIZE;
     sPad->speed = 0.1;
-    sPad->power = 0.1;
+    sPad->power = SCROLL_PAD_INITIAL_POWER;
     sPad->update = ScrollPadUpdate;
 
     return sPad;
