@@ -113,28 +113,47 @@ extern uVectorEntry __vector_table;
 
 
 volatile int* upgradeTrigger;
-struct BattlePongGame* battlePongGame;
+volatile float* pBallVelX;
+volatile float* pBallVelY;
+volatile float* pBallPosX;
 volatile char boardCommand[64];
 volatile int board_idx = 0;
 //*****************************************************************************
 //                 GLOBAL VARIABLES -- End
 //*****************************************************************************
+void PongBallRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, int recvPosX) {
+    printf("Pong ball vel %f %f pos %d\n", recvVelX, recvVelY, recvPosX);
+
+    game->pBall->radius = 1;
+    game->pBall->pos.x = (float)(recvPosX);
+    game->pBall->pos.y = (float)game->pBall->radius;
+    game->pBall->velocity.x = recvVelX;
+    game->pBall->velocity.y = -recvVelY;
+
+    printf("Velocity: %f\n", game->pBall->velocity.y);
+
+    game->pBall->relativeSpeed = 2;
+    game->pBall->color = MAGENTA;
+}
+
 
 static void GPIOA2IntHandler(void) {
     uint64_t ulStatus = GPIOIntStatus(UPGRADE_POWER_BUTTON_BASE, true);
     GPIOIntClear(UPGRADE_POWER_BUTTON_BASE, ulStatus);
 
     if (ulStatus & UPGRADE_POWER_BUTTON_PIN) {
-        battlePongGame->upgradePowerTrigger = true;
+        *upgradeTrigger = true;
     }
 
     return;
 }
 
 
-static void UARTIntHandler(void) {
+void UARTIntHandler(void) {
     unsigned char recvChar;
     UARTIntDisable(UARTA1_BASE, UART_INT_RX);
+
+    printf("Prev Y %f\n", *pBallVelY);
 
     board_idx = 0;
     while (UARTCharsAvail(UARTA1_BASE) || UARTSpaceAvail(UARTA1_BASE)) {
@@ -145,17 +164,18 @@ static void UARTIntHandler(void) {
 
     }
 
-
-
     int velX, velY, posX;
     char cmdType[4];
     //printf("Recieved %s\n", boardCommand);
     if (sscanf(boardCommand, "%s %d %d %d", cmdType, &velX, &velY, &posX) == 4) {
         printf("cmp result %d\n", strcmp(cmdType, "BAL"));
         if (strcmp(cmdType, "BAL") == 0) {
-            battlePongGame->pongBallRecv(battlePongGame, velX/100.f, velY/100.f, posX);
+            *pBallVelX = velX/100.f;
+            *pBallVelY = 100.f;
+            *pBallPosX = posX;
+            //battlePongGame->pongBallRecv(battlePongGame, velX/100.f, velY/100.f, posX);
         } else if (strcmp(cmdType, "CAN") == 0) {
-            battlePongGame->cannonShotRecv(battlePongGame, velX/100.f, velY/100.f, posX);
+
         }
     }
 
@@ -256,6 +276,8 @@ UARTInit(void)
     UARTEnable(UARTA1_BASE);
 }
 
+
+
 //*****************************************************************************
 //
 //! Main function for spi demo application
@@ -295,9 +317,18 @@ void main(){
     ButtonInit();
     UARTInit();
 
+
+
+
     Adafruit_Init();
     fillScreen(BLACK);
-    battlePongGame = CreateBattlePongGame();
+    struct BattlePongGame* battlePongGame = CreateBattlePongGame();
+
+    upgradeTrigger = &(battlePongGame->upgradePowerTrigger);
+    pBallVelX = &(battlePongGame->pBall->velocity.x);
+    pBallVelY = &(battlePongGame->pBall->velocity.y);
+    pBallPosX = &(battlePongGame->pBall->pos.x);
+
 
     battlePongGame->play(battlePongGame);
 

@@ -278,10 +278,10 @@ void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game) {
             UtilsDelay(UART_SIGNAL_DELAY);
         }
         UARTIntEnable(UARTA1_BASE, UART_INT_RX);
-        pBall->velocity.y = 0;
-        pBall->pos.y = - pBall->radius;
-        //pBall->velocity.y *= -1;
-        //pBall->pos.y = pBall->radius;
+        //pBall->velocity.y = 0;
+        //pBall->pos.y = - pBall->radius;
+        pBall->velocity.y = 0.2;
+        pBall->pos.y = pBall->radius;
     }
 
     //drawCircle(round(pBall->pos.x), round(pBall->pos.y), pBall->radius, pBall->color);
@@ -291,21 +291,6 @@ void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game) {
     drawPixel(round(pBall->pos.x), round(pBall->pos.y) - 1, pBall->color);
 }
 
-
-void PongBallRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, int recvPosX) {
-    printf("Pong ball vel %f %f pos %d\n", recvVelX, recvVelY, recvPosX);
-
-    game->pBall->radius = 1;
-    game->pBall->pos.x = recvPosX;
-    game->pBall->pos.y = game->pBall->radius;
-    game->pBall->velocity.x = recvVelX;
-    game->pBall->velocity.y = -recvVelY;
-
-    printf("Velocity: %f\n", game->pBall->velocity.y);
-
-    game->pBall->relativeSpeed = 2;
-    game->pBall->color = MAGENTA;
-}
 
 // After collision bounces the pong ball back
 void PongBallPadBounceMechanic(struct PongBall* pBall, struct ScrollPad* sPad) {
