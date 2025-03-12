@@ -33,7 +33,7 @@ float readJoyStickADC(int uiAdcInputPin) {
 #endif
     PinTypeADC(uiAdcInputPin,PIN_MODE_255);
 
-    uiChannel = ADC_CH_1;
+    uiChannel = ADC_CH_3;
 
     ADCTimerConfig(ADC_BASE,2^17);
     ADCTimerEnable(ADC_BASE);
@@ -72,7 +72,7 @@ float readJoyStickADC(int uiAdcInputPin) {
 
 // Scroll Pad Movement and draw
 void ScrollPadUpdate(struct ScrollPad* sPad, unsigned int bgColor) {
-    float joyAccX = readJoyStickADC(PIN_58);
+    float joyAccX = readJoyStickADC(PIN_60);
     int xDiff = sPad->size / 2;
     int oldCenterX = round(sPad->pos.x);
     sPad->pos.x += (joyAccX * sPad->speed);

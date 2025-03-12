@@ -113,6 +113,9 @@ extern uVectorEntry __vector_table;
 
 
 volatile int* upgradeTrigger;
+struct BattlePongGame* battlePongGame;
+volatile char boardCommand[64];
+volatile int board_idx = 0;
 //*****************************************************************************
 //                 GLOBAL VARIABLES -- End
 //*****************************************************************************
@@ -122,10 +125,42 @@ static void GPIOA2IntHandler(void) {
     GPIOIntClear(UPGRADE_POWER_BUTTON_BASE, ulStatus);
 
     if (ulStatus & UPGRADE_POWER_BUTTON_PIN) {
-        *upgradeTrigger = true;
+        battlePongGame->upgradePowerTrigger = true;
     }
 
     return;
+}
+
+
+static void UARTIntHandler(void) {
+    unsigned char recvChar;
+    UARTIntDisable(UARTA1_BASE, UART_INT_RX);
+
+    board_idx = 0;
+    while (UARTCharsAvail(UARTA1_BASE) || UARTSpaceAvail(UARTA1_BASE)) {
+        recvChar = UARTCharGet(UARTA1_BASE);
+        if (recvChar == '\n') break;
+        boardCommand[board_idx++] = recvChar;
+        UtilsDelay(500);
+
+    }
+
+
+
+    int velX, velY, posX;
+    char cmdType[4];
+    //printf("Recieved %s\n", boardCommand);
+    if (sscanf(boardCommand, "%s %d %d %d", cmdType, &velX, &velY, &posX) == 4) {
+        printf("cmp result %d\n", strcmp(cmdType, "BAL"));
+        if (strcmp(cmdType, "BAL") == 0) {
+            battlePongGame->pongBallRecv(battlePongGame, velX/100.f, velY/100.f, posX);
+        } else if (strcmp(cmdType, "CAN") == 0) {
+            battlePongGame->cannonShotRecv(battlePongGame, velX/100.f, velY/100.f, posX);
+        }
+    }
+
+    UARTIntClear(UARTA1_BASE, UART_INT_RX);
+    UARTIntEnable(UARTA1_BASE, UART_INT_RX);
 }
 
 
@@ -204,6 +239,23 @@ ButtonInit(void)
     GPIOIntEnable(UPGRADE_POWER_BUTTON_BASE, UPGRADE_POWER_BUTTON_PIN);
 }
 
+static void
+UARTInit(void)
+{
+    // Initialize partner device over UART 1
+    PRCMPeripheralReset(PRCM_UARTA1);
+    UARTConfigSetExpClk(
+            UARTA1_BASE,
+            PRCMPeripheralClockGet(PRCM_UARTA1),
+            UART_BAUD_RATE,
+            (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE)
+    );
+    UARTIntRegister(UARTA1_BASE, UARTIntHandler);
+    UARTIntEnable(UARTA1_BASE, UART_INT_RX);
+    UARTFIFOLevelSet(UARTA1_BASE, UART_FIFO_TX1_8, UART_FIFO_RX1_8);
+    UARTEnable(UARTA1_BASE);
+}
+
 //*****************************************************************************
 //
 //! Main function for spi demo application
@@ -241,13 +293,11 @@ void main(){
 
     SPIInit();
     ButtonInit();
-
-    struct BattlePongGame* battlePongGame = CreateBattlePongGame();
-    upgradeTrigger = &(battlePongGame->upgradePowerTrigger);
+    UARTInit();
 
     Adafruit_Init();
     fillScreen(BLACK);
-
+    battlePongGame = CreateBattlePongGame();
 
     battlePongGame->play(battlePongGame);
 

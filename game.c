@@ -10,6 +10,7 @@
 #include "math.h"
 #include "utils.h"
 #include "i2c_if.h"
+#include "uart.h"
 
 #include "systick.h"
 
@@ -145,6 +146,13 @@ void BattlePongGameFireHandler(struct BattlePongGame* game) {
                 swapOledBalls(game->cannonShots, i, game->numShots);
             }
             i--;
+        } else if (game->cannonShots[i].pos.y >= game->sPad->pos.y) {
+            int sPadMinX = round(game->sPad->pos.x) - (game->sPad->size/2);
+            int sPadMaxX = round(game->sPad->pos.x) + (game->sPad->size/2);
+            int cannonX = game->cannonShots[i].pos.x;
+            if (cannonX > sPadMinX && cannonX < sPadMaxX) {
+                game->winCondition = LOSE_CON;
+            }
         }
     }
 
@@ -202,6 +210,8 @@ struct BattlePongGame* CreateBattlePongGame() {
     game->collisionDetection = BattlePongGameBoxUpdate;
     game->fireHandler = BattlePongGameFireHandler;
     game->upgradeHandler = BattlePongGameUpgradeHandler;
+    game->pongBallRecv = PongBallRecv;
+    game->cannonShotRecv = CannonShotRecv;
 
     return game;
 }
@@ -210,6 +220,14 @@ struct BattlePongGame* CreateBattlePongGame() {
 //////////////////////////////////////////////
 
 void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game) {
+    static int n = 0;
+    n++;
+    if (n % 1000 == 0) {
+        printf("Inside pong update! %f\n", pBall->velocity.y);
+    }
+    if (pBall->velocity.y == 0.f) {
+        return;
+    }
     int oldX, oldY;
     oldX = round(pBall->pos.x);
     oldY = round(pBall->pos.y);
@@ -247,9 +265,21 @@ void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game) {
          // ************************************************ \\
         // ADD AWS CONFIGURATION HERE WHEN BALL LEAVES SCREEN \\
 
+        char sendPongCmd[64];
+        int size = sprintf(sendPongCmd, "BAL %d %d %d\n",
+                           (int)lround(pBall->velocity.x * 100.0),
+                           (int)lround(pBall->velocity.y * 100.0),
+                           (int)lround(pBall->pos.x));
+        int j;
+        //printf("Sending %s\n", sendPongCmd);
+        UARTIntDisable(UARTA1_BASE, UART_INT_RX);
+        for (j = 0; j < size; j++) {
+            UARTCharPut(UARTA1_BASE, sendPongCmd[j]);
+            UtilsDelay(UART_SIGNAL_DELAY);
+        }
+        UARTIntEnable(UARTA1_BASE, UART_INT_RX);
         pBall->velocity.y = 0;
         pBall->pos.y = - pBall->radius;
-        pBall->update = PongBallNeutral;
         //pBall->velocity.y *= -1;
         //pBall->pos.y = pBall->radius;
     }
@@ -261,16 +291,20 @@ void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game) {
     drawPixel(round(pBall->pos.x), round(pBall->pos.y) - 1, pBall->color);
 }
 
-void PongBallNeutral(struct PongBall* pBall, struct BattlePongGame* game) {
-    return;
-}
 
-void PongBallRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, float recvPosX) {
-    game->pBall->update = PongBallUpdate;
+void PongBallRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, int recvPosX) {
+    printf("Pong ball vel %f %f pos %d\n", recvVelX, recvVelY, recvPosX);
+
+    game->pBall->radius = 1;
     game->pBall->pos.x = recvPosX;
     game->pBall->pos.y = game->pBall->radius;
     game->pBall->velocity.x = recvVelX;
-    game->pBall->velocity.y = recvVelY;
+    game->pBall->velocity.y = -recvVelY;
+
+    printf("Velocity: %f\n", game->pBall->velocity.y);
+
+    game->pBall->relativeSpeed = 2;
+    game->pBall->color = MAGENTA;
 }
 
 // After collision bounces the pong ball back
@@ -321,6 +355,18 @@ void CannonShotUpdate(struct OledBall* shot) {
     drawPixel(oldX - 1, oldY, shot->color);
     drawPixel(oldX, oldY + 1, shot->color);
     drawPixel(oldX, oldY - 1, shot->color);
+}
+
+void CannonShotRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, int recvPosX) {
+    struct OledBall* cannonShot = game->cannonShots;
+
+    cannonShot[game->numShots].color = RED;
+    cannonShot[game->numShots].bgColor = game->bgColor;
+    cannonShot[game->numShots].pos.x = recvPosX;
+    cannonShot[game->numShots].pos.y = game->pBall->radius;
+    cannonShot[game->numShots].velocity.x = recvVelX;
+    cannonShot[game->numShots].velocity.y = -recvVelY;
+    cannonShot[game->numShots].update = CannonShotUpdate;
 }
 
 

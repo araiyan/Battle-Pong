@@ -36,7 +36,7 @@
 //
 //*****************************************************************************
 
-// This file was automatically generated on 3/10/2025 at 4:49:39 PM
+// This file was automatically generated on 3/11/2025 at 11:46:14 PM
 // by TI PinMux version 1.15.0+2826
 //
 //*****************************************************************************
@@ -57,14 +57,14 @@ void PinMuxConfig(void)
     //
     // Set unused pins to PIN_MODE_0 with the exception of JTAG pins 16,17,19,20
     //
+    PinModeSet(PIN_04, PIN_MODE_0);
     PinModeSet(PIN_06, PIN_MODE_0);
     PinModeSet(PIN_15, PIN_MODE_0);
     PinModeSet(PIN_21, PIN_MODE_0);
     PinModeSet(PIN_45, PIN_MODE_0);
     PinModeSet(PIN_50, PIN_MODE_0);
     PinModeSet(PIN_52, PIN_MODE_0);
-    PinModeSet(PIN_58, PIN_MODE_0);
-    PinModeSet(PIN_59, PIN_MODE_0);
+    PinModeSet(PIN_53, PIN_MODE_0);
     PinModeSet(PIN_60, PIN_MODE_0);
     PinModeSet(PIN_61, PIN_MODE_0);
     PinModeSet(PIN_62, PIN_MODE_0);
@@ -77,8 +77,8 @@ void PinMuxConfig(void)
     PRCMPeripheralClkEnable(PRCM_GPIOA3, PRCM_RUN_MODE_CLK);
     PRCMPeripheralClkEnable(PRCM_I2CA0, PRCM_RUN_MODE_CLK);
     PRCMPeripheralClkEnable(PRCM_GSPI, PRCM_RUN_MODE_CLK);
-    PRCMPeripheralClkEnable(PRCM_UARTA1, PRCM_RUN_MODE_CLK);
     PRCMPeripheralClkEnable(PRCM_UARTA0, PRCM_RUN_MODE_CLK);
+    PRCMPeripheralClkEnable(PRCM_UARTA1, PRCM_RUN_MODE_CLK);
 
     //
     // Configure PIN_63 for GPIO Output
@@ -131,22 +131,22 @@ void PinMuxConfig(void)
     PinTypeSPI(PIN_07, PIN_MODE_7);
 
     //
-    // Configure PIN_55 for UART1 UART1_TX
+    // Configure PIN_55 for UART0 UART0_TX
     //
-    PinTypeUART(PIN_55, PIN_MODE_6);
+    PinTypeUART(PIN_55, PIN_MODE_3);
 
     //
-    // Configure PIN_57 for UART1 UART1_RX
+    // Configure PIN_57 for UART0 UART0_RX
     //
-    PinTypeUART(PIN_57, PIN_MODE_6);
+    PinTypeUART(PIN_57, PIN_MODE_3);
 
     //
-    // Configure PIN_53 for UART0 UART0_TX
+    // Configure PIN_58 for UART1 UART1_TX
     //
-    PinTypeUART(PIN_53, PIN_MODE_9);
+    PinTypeUART(PIN_58, PIN_MODE_6);
 
     //
-    // Configure PIN_04 for UART0 UART0_RX
+    // Configure PIN_59 for UART1 UART1_RX
     //
-    PinTypeUART(PIN_04, PIN_MODE_7);
+    PinTypeUART(PIN_59, PIN_MODE_6);
 }

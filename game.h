@@ -18,6 +18,9 @@ extern "C"
 #define WINDOW_WIDTH 128
 #define WINDOW_HEIGHT 128
 
+// UART Config
+#define UART_SIGNAL_DELAY 200
+
 #define WIN_CON  -1
 #define LOSE_CON -2
 
@@ -75,6 +78,8 @@ struct BattlePongGame {
     void (*collisionDetection)(struct BattlePongGame*);
     void (*fireHandler)(struct BattlePongGame*);
     void (*upgradeHandler)(struct BattlePongGame*);
+    void (*pongBallRecv)(struct BattlePongGame*, float, float, int);
+    void (*cannonShotRecv)(struct BattlePongGame*, float, float, int);
 };
 
 struct PongBall {
@@ -103,8 +108,10 @@ extern struct BattlePongGame* CreateBattlePongGame();
 
 extern void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game);
 extern void PongBallNeutral(struct PongBall* pBall, struct BattlePongGame* game);
-extern void PongBallRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, float recvPosX);
+extern void PongBallRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, int recvPosX);
 extern struct PongBall* CreatePongBallObject(int x, int y);
+
+extern void CannonShotRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, int recvPosX);
 //*****************************************************************************
 //
 // Mark the end of the C bindings section for C++ compilers.
