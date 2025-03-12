@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "i2c_if.h"
 #include "uart.h"
+#include "string.h"
 
 #include "systick.h"
 
@@ -35,6 +36,65 @@ void grabAccelerometerZ(int *z) {
 
     // Normalize z tilt
     if (*z > 127) *z -= 256;
+}
+
+void cmdParser(char* cmd, struct BattlePongGame* game) {
+    char cmdType[4];
+    int velX, velY, posX;
+    if (sscanf(cmd, "%s %d %d %d", cmdType, &velX, &velY, &posX) == 4) {
+        if (strcmp(cmdType, "BAL") == 0) {
+            game->pongBallRecv(game, velX/100.f, velY/100.f, posX);
+        } else if (strcmp(cmdType, "CAN") == 0) {
+            game->cannonShotRecv(game, velX/100.f, velY/100.f, posX);
+        } else if (strcmp(cmdType, "WIN") == 0) {
+            game->winCondition = WIN_CON;
+        }
+    }
+}
+
+void sendUARTPongCommand(float velX, float velY, float posX) {
+    char sendPongCmd[64];
+    int size = sprintf(sendPongCmd, "BAL %d %d %d\n",
+                       (int)lround(velX * 100.0),
+                       (int)lround(velY * 100.0),
+                       (int)lround(posX));
+    int j;
+    //printf("Sending %s\n", sendPongCmd);
+    UARTIntDisable(UARTA1_BASE, UART_INT_RX);
+    for (j = 0; j < size; j++) {
+        UARTCharPut(UARTA1_BASE, sendPongCmd[j]);
+        UtilsDelay(UART_SIGNAL_DELAY);
+    }
+    UARTIntEnable(UARTA1_BASE, UART_INT_RX);
+}
+
+void sendUARTCannonCommand(float velX, float velY, float posX) {
+    // Cannon Shot Send Logic
+    char sendPongCmd[64];
+    int size = sprintf(sendPongCmd, "CAN %d %d %d\n",
+                       (int)lround(velX * 100.0),
+                       (int)lround(velY * 100.0),
+                       (int)lround(posX));
+    int j;
+    //printf("Sending %s\n", sendPongCmd);
+    UARTIntDisable(UARTA1_BASE, UART_INT_RX);
+    for (j = 0; j < size; j++) {
+        UARTCharPut(UARTA1_BASE, sendPongCmd[j]);
+        UtilsDelay(UART_SIGNAL_DELAY);
+    }
+    UARTIntEnable(UARTA1_BASE, UART_INT_RX);
+}
+
+void sendUARTWinCommand() {
+    char sendWinCmd[64];
+    strcpy(sendWinCmd, "WIN 0 0 0\n");
+    int j;
+    UARTIntDisable(UARTA1_BASE, UART_INT_RX);
+    for (j = 0; j < 10; j++) {
+        UARTCharPut(UARTA1_BASE, sendWinCmd[j]);
+        UtilsDelay(UART_SIGNAL_DELAY);
+    }
+    UARTIntEnable(UARTA1_BASE, UART_INT_RX);
 }
 
 // ************* Game Logic **************** \\
@@ -69,6 +129,7 @@ void BattlePongGamePlay(struct BattlePongGame* game) {
         setCursor(20, 64);
         Outstr("Game Won!!!");
     } else if (game->winCondition == LOSE_CON) {
+        sendUARTWinCommand();
         printf("Lost Game");
         setCursor(20, 64);
         Outstr("Game Lost :(");
@@ -78,7 +139,7 @@ void BattlePongGamePlay(struct BattlePongGame* game) {
 // Draws the score on the screen
 void DrawScore(int score) {
     setCursor(4, 4);
-    Outstr("Score: ");
+    Outstr("Points: ");
 
     char scr[20];
     sprintf(scr, "%d", score);
@@ -126,10 +187,11 @@ void BattlePongGameFireHandler(struct BattlePongGame* game) {
     grabAccelerometerZ(&accZ);
 
     if (accZ < -50) {
-        if (game->cannonBuffer > CANNON_RELOAD_TIME && game->numShots < CANNON_MAX_NUM_SHOTS) {
+        if (game->cannonBuffer > CANNON_RELOAD_TIME && game->numShots < CANNON_MAX_NUM_SHOTS && game->score >= CANNON_SHOT_COST) {
             // Spawn the cannon fire
             CreateCannonShot(game);
             game->cannonBuffer = 0;
+            game->score -= CANNON_SHOT_COST;
         }
     }
 
@@ -142,6 +204,8 @@ void BattlePongGameFireHandler(struct BattlePongGame* game) {
             drawCircle(round(ball1Ptr->pos.x), round(ball1Ptr->pos.y), CANNON_SIZE, game->bgColor);
             game->numShots--;
 
+            sendUARTCannonCommand(ball1Ptr->velocity.x, ball1Ptr->velocity.y, ball1Ptr->pos.x);
+
             if (game->numShots != i) {
                 swapOledBalls(game->cannonShots, i, game->numShots);
             }
@@ -152,6 +216,14 @@ void BattlePongGameFireHandler(struct BattlePongGame* game) {
             int cannonX = game->cannonShots[i].pos.x;
             if (cannonX > sPadMinX && cannonX < sPadMaxX) {
                 game->winCondition = LOSE_CON;
+            } else {
+                struct OledBall* ball1Ptr = &game->cannonShots[i];
+                drawCircle(round(ball1Ptr->pos.x), round(ball1Ptr->pos.y), CANNON_SIZE, game->bgColor);
+                game->numShots--;
+                if (game->numShots != i) {
+                    swapOledBalls(game->cannonShots, i, game->numShots);
+                }
+                i--;
             }
         }
     }
@@ -169,24 +241,22 @@ void BattlePongGameUpgradeHandler(struct BattlePongGame* game) {
             game->score -= SCROLL_PAD_POWER_UPGRADE_COST;
 
             DrawScore(game->score);
-
-            // PONG PONG RECV LOGIC
-            float velX = ((rand() % 96) - 48) / 240.f, velY = (rand() % 96) / 480.f;
-            int posX = (rand() % 96) + game->pBall->radius;
-            PongBallRecv(game, velX, velY, posX);
         }
     }
 
     game->upgradePowerBuffer++;
 }
 
-struct BattlePongGame* CreateBattlePongGame() {
+struct BattlePongGame* CreateBattlePongGame(int playerNum) {
     struct BattlePongGame* game = (struct BattlePongGame*)malloc(sizeof(struct BattlePongGame));
 
     game->bgColor = BLACK;
     game->dotBall = CreateDotObject();
     game->sPad = CreateScrollPadObject();
     game->pBall = CreatePongBallObject(64, 16);
+    game->cmdIdx = 0;
+
+    game->cmdRecvBuffer = (char *)malloc(sizeof(char) * 64);
 
     game->cannonShots = (struct OledBall*)malloc(sizeof(struct OledBall) * CANNON_MAX_NUM_SHOTS);
     game->numShots = 0;
@@ -213,17 +283,36 @@ struct BattlePongGame* CreateBattlePongGame() {
     game->pongBallRecv = PongBallRecv;
     game->cannonShotRecv = CannonShotRecv;
 
+    if (playerNum == 1) {
+        game->pBall->velocity.y = 0.f;
+        game->pBall->pos.y = -game->pBall->radius;
+    }
+
     return game;
 }
 
 // ************* Pong Ball **************** \\
 //////////////////////////////////////////////
 
+void PongBallRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, int recvPosX) {
+    //printf("Pong ball vel %f %f pos %d\n", recvVelX, recvVelY, recvPosX);
+
+    game->pBall->radius = 1;
+    game->pBall->pos.x = abs(recvPosX - WINDOW_WIDTH);
+    game->pBall->pos.y = game->pBall->radius;
+    game->pBall->velocity.x = -recvVelX;
+    game->pBall->velocity.y = -recvVelY;
+
+    //printf("Velocity: %f\n", game->pBall->velocity.y);
+
+    game->pBall->relativeSpeed = INITIAL_RELATIVE_SPEED;
+    game->pBall->color = MAGENTA;
+}
+
 void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game) {
-    static int n = 0;
-    n++;
-    if (n % 1000 == 0) {
-        printf("Inside pong update! %f\n", pBall->velocity.y);
+    if (game->cmdIdx > 0) {
+        cmdParser(game->cmdRecvBuffer, game);
+        game->cmdIdx = 0;
     }
     if (pBall->velocity.y == 0.f) {
         return;
@@ -255,33 +344,22 @@ void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game) {
         int boardDiff = game->sPad->size / 2;
         if (pBall->pos.x <= (game->sPad->pos.x + (boardDiff + pBall->radius)) && pBall->pos.x >= (game->sPad->pos.x - (boardDiff + pBall->radius))) {
             PongBallPadBounceMechanic(pBall, game->sPad);
+            game->score++;
             game->redrawCount = 0;
         } else {
-            pBall->velocity.y *= -1;
-            pBall->pos.y = game->sPad->pos.y - pBall->radius;
-            //game->winCondition = LOSE_CON;
+            //pBall->velocity.y *= -1;
+            //pBall->pos.y = game->sPad->pos.y - pBall->radius;
+            game->winCondition = LOSE_CON;
         }
     } else if (pBall->pos.y < pBall->radius) {
          // ************************************************ \\
         // ADD AWS CONFIGURATION HERE WHEN BALL LEAVES SCREEN \\
 
-        char sendPongCmd[64];
-        int size = sprintf(sendPongCmd, "BAL %d %d %d\n",
-                           (int)lround(pBall->velocity.x * 100.0),
-                           (int)lround(pBall->velocity.y * 100.0),
-                           (int)lround(pBall->pos.x));
-        int j;
-        //printf("Sending %s\n", sendPongCmd);
-        UARTIntDisable(UARTA1_BASE, UART_INT_RX);
-        for (j = 0; j < size; j++) {
-            UARTCharPut(UARTA1_BASE, sendPongCmd[j]);
-            UtilsDelay(UART_SIGNAL_DELAY);
-        }
-        UARTIntEnable(UARTA1_BASE, UART_INT_RX);
-        //pBall->velocity.y = 0;
-        //pBall->pos.y = - pBall->radius;
-        pBall->velocity.y = 0.2;
-        pBall->pos.y = pBall->radius;
+        sendUARTPongCommand(pBall->velocity.x, pBall->velocity.y, pBall->pos.x);
+        pBall->velocity.y = 0;
+        pBall->pos.y = - pBall->radius;
+        //pBall->velocity.y = 0.2;
+        //pBall->pos.y = pBall->radius;
     }
 
     //drawCircle(round(pBall->pos.x), round(pBall->pos.y), pBall->radius, pBall->color);
@@ -311,7 +389,7 @@ struct PongBall* CreatePongBallObject(int x, int y) {
     pBall->velocity.x = 0.1;
     pBall->velocity.y = 0.1;
 
-    pBall->relativeSpeed = 2;
+    pBall->relativeSpeed = INITIAL_RELATIVE_SPEED;
     pBall->color = MAGENTA;
     pBall->radius = 1;
 
@@ -332,14 +410,26 @@ void CannonShotUpdate(struct OledBall* shot) {
     drawPixel(oldX, oldY + 1, shot->bgColor);
     drawPixel(oldX, oldY - 1, shot->bgColor);
 
+
+
     shot->pos.y += shot->velocity.y;
+    shot->pos.x += shot->velocity.x;
 
-    oldY = round(shot->pos.y);
+    int newX = round(shot->pos.x);
+    int newY = round(shot->pos.y);
 
-    drawPixel(oldX + 1, oldY, shot->color);
-    drawPixel(oldX - 1, oldY, shot->color);
-    drawPixel(oldX, oldY + 1, shot->color);
-    drawPixel(oldX, oldY - 1, shot->color);
+    drawPixel(newX + 1, newY, shot->color);
+    drawPixel(newX - 1, newY, shot->color);
+    drawPixel(newX, newY + 1, shot->color);
+    drawPixel(newX, newY - 1, shot->color);
+
+    if (shot->velocity.y < 0) {
+        drawPixel(oldX, oldY + 3, shot->bgColor);
+        drawPixel(newX, newY + 1, shot->color);
+    } else if (shot->velocity.y > 0) {
+        drawPixel(oldX, oldY - 3, shot->bgColor);
+        drawPixel(newX, newY - 1, shot->color);
+    }
 }
 
 void CannonShotRecv(struct BattlePongGame* game, float recvVelX, float recvVelY, int recvPosX) {
@@ -347,11 +437,13 @@ void CannonShotRecv(struct BattlePongGame* game, float recvVelX, float recvVelY,
 
     cannonShot[game->numShots].color = RED;
     cannonShot[game->numShots].bgColor = game->bgColor;
-    cannonShot[game->numShots].pos.x = recvPosX;
+    cannonShot[game->numShots].pos.x = abs(recvPosX - WINDOW_WIDTH);
     cannonShot[game->numShots].pos.y = game->pBall->radius;
-    cannonShot[game->numShots].velocity.x = recvVelX;
+    cannonShot[game->numShots].velocity.x = -recvVelX;
     cannonShot[game->numShots].velocity.y = -recvVelY;
     cannonShot[game->numShots].update = CannonShotUpdate;
+
+    game->numShots++;
 }
 
 

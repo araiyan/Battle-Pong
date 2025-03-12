@@ -36,6 +36,8 @@ extern "C"
 #define WHITE           0xFFFF
 #define PINK            0xFAFA
 
+// PONG CONFIG
+#define INITIAL_RELATIVE_SPEED 1
 
 // OLED BALL CONFIGURATION
 #define BALL_SPEED 0.01
@@ -47,8 +49,9 @@ extern "C"
 
 // CANNON FIRE CONFIGURATION
 #define CANNON_RELOAD_TIME 100
-#define CANNON_MAX_NUM_SHOTS 10
+#define CANNON_MAX_NUM_SHOTS 20
 #define CANNON_SIZE 1
+#define CANNON_SHOT_COST 1
 
 // *********************************************************** //
 // Useful Structures
@@ -57,7 +60,10 @@ struct BattlePongGame {
     struct Vector2DI boxSize;
     struct OledBall* dotBall;
     struct ScrollPad* sPad;
+
     struct PongBall* pBall;
+    char* cmdRecvBuffer;
+    int cmdIdx;
 
     struct OledBall* cannonShots;
     int numShots;
@@ -104,7 +110,7 @@ extern void BattlePongGameDrawGoalBox(struct BattlePongGame* game);
 extern void BattlePongGameBoxUpdate(struct BattlePongGame* game);
 extern void BattlePongGameFireHandler(struct BattlePongGame* game);
 extern void BattlePongGameUpgradeHandler(struct BattlePongGame* game);
-extern struct BattlePongGame* CreateBattlePongGame();
+extern struct BattlePongGame* CreateBattlePongGame(int playerNumber);
 
 extern void PongBallUpdate(struct PongBall* pBall, struct BattlePongGame* game);
 extern void PongBallNeutral(struct PongBall* pBall, struct BattlePongGame* game);

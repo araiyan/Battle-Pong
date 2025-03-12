@@ -19,7 +19,7 @@ extern "C"
 #define SCROLL_PAD_INITIAL_POWER 0.1
 
 #define SCROLL_PAD_POWER_UPGRADE_COST 2
-#define SCROLL_PAD_POWER_UPGRADE_INCR 0.02
+#define SCROLL_PAD_POWER_UPGRADE_INCR 0.01
 
 // Scroll Pad Struct
 struct ScrollPad {
